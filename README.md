@@ -1,7 +1,7 @@
 # Advanced-Data-Management
 This is public repository for my journey to learn advanced data management. Mostly here will be exercises for my class at Lapland UAS, but there will be also some personal projects of my own related to the topic. Readme file will also be added when I have time to add it. Repository will be updated on at least weekly/monthly basis.
 
-# Repository Structure & Info
+## Repository Structure & Info
 Structure of this repository will be explained down below:
   There will be  at least 4-5 repositories, which might change in the future.
   These repositories will be: 
@@ -20,15 +20,13 @@ All documentation within this file can be used for educational purposes.
 
 Just be aware that my coding style might not be the same as yours and you can adjust it to your own liking.
 
-# Information About me
-Some information about me:
-
-## Coding & Data Management, Data Analytics, Job Experience
+## Information About me
+### Coding & Data Management, Data Analytics, Job Experience
 I personally have about 3 years worth of coding experience in Python and other C/C-based languages, so my code could need some improvements. I am also just learning Java so just be aware.  About data management & Analytics I have about 2 years of experience. Professionally I have not yet worked within fields of Data Analytics or Management, but I do hope that in some near future that might be possible. While I do have experience of working on some projects that included these topics, and I have worked in IT Assistant services, IoT Lab Trainee & as Production Engineer, from these I have about 5-6 months of practice.
 
 As work experience from data bases I have experience on as an end user quite much, otherwise all experience has come through my studies or from my personal projects.
 
-## Recruiters
+### Recruiters
 Dear recruiters,
 
 If you read this and think my data management or data analytics could suit for your company's purposes feel free to contact me. Contact information down below:
