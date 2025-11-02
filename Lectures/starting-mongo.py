@@ -23,7 +23,7 @@ all_users = users.find({"orders.product": "Phone"})
 for u in all_users:
     print(u["name"])
     
-
+# Find user whose 
 user = users.find_one({"user_ID": 1}, {"_id": 0, "name": 1, "email": 1})
 print(user)
 

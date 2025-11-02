@@ -1,0 +1,109 @@
+-- 1. All employees (all columns)
+SELECT * FROM employees;
+
+-- 2. Employee whose id is 10 (all columns)
+SELECT * FROM employees
+WHERE employee_id = 10;
+
+-- 3. Employee with id 20, only first_name and salary
+SELECT first_name, salary
+FROM employees
+WHERE employee_id = 20;
+
+-- 4. Employees whose last_name is 'kuru' and salary > 5000
+SELECT * FROM employees
+WHERE last_name = 'kuru' AND salary > 5000;
+
+-- 5. INNER JOIN employees and departments, show id, first_name, last_name, department name
+SELECT e.employee_id, e.first_name, e.last_name, d.department_name
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.department_id;
+
+-- 6. Employees in Sales or Software Engineering department
+SELECT e.first_name, e.last_name, d.department_name
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.department_id
+WHERE d.department_name IN ('Sales', 'Software Engineering');
+
+-- 7. Count the age of employees
+SELECT first_name, last_name,
+       TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) AS age
+FROM employees;
+
+-- 8. Lowest salary of all employees
+SELECT MIN(salary) AS lowest_salary
+FROM employees;
+
+-- 9. Employee having the highest salary
+SELECT *
+FROM employees
+WHERE salary = (SELECT MAX(salary) FROM employees);
+
+-- 10. Highest salary in Human Resources or Software Development department
+SELECT d.department_name, MAX(e.salary) AS highest_salary
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.department_id
+WHERE d.department_name IN ('Human Resources', 'Software Development')
+GROUP BY d.department_name;
+
+-- 11. Lowest salary in Salaries department
+SELECT d.department_name, MIN(e.salary) AS lowest_salary
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.department_id
+WHERE d.department_name = 'Salaries'
+GROUP BY d.department_name;
+
+-- 12. Average salaries by department
+SELECT d.department_name, AVG(e.salary) AS avg_salary
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.department_id
+GROUP BY d.department_name;
+
+-- 13. Add new department named RnD-department
+INSERT INTO departments (department_name)
+VALUES ('RnD-department');
+
+-- 14. Departments with zero employees
+SELECT d.department_name
+FROM departments d
+LEFT JOIN employees e ON d.department_id = e.department_id
+WHERE e.employee_id IS NULL;
+
+-- 15. Departments with average salary > 4200
+SELECT d.department_name, AVG(e.salary) AS avg_salary
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.department_id
+GROUP BY d.department_name
+HAVING AVG(e.salary) > 4200;
+
+-- 16. Number of employees by department
+SELECT d.department_name, COUNT(e.employee_id) AS number_of_employees
+FROM departments d
+LEFT JOIN employees e ON d.department_id = e.department_id
+GROUP BY d.department_name;
+
+-- 17. Employees whose salary < company average
+SELECT CONCAT(first_name, ' ', last_name) AS full_name, salary
+FROM employees
+WHERE salary < (SELECT AVG(salary) FROM employees);
+
+-- 18. Employees whose salary < average salary of their department
+SELECT *
+FROM employees e1
+WHERE salary < (
+    SELECT AVG(e2.salary)
+    FROM employees e2
+    WHERE e2.department_id = e1.department_id
+);
+
+-- 19. Every employee's salary and company average salary
+SELECT salary,
+       (SELECT AVG(salary) FROM employees) AS avg_salary
+FROM employees;
+
+-- 20. Every employee's salary and lowest salary of their department
+SELECT e.salary,
+       (SELECT MIN(e2.salary)
+        FROM employees e2
+        WHERE e2.department_id = e.department_id) AS lowest_salary_of_dep
+FROM employees e;

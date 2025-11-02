@@ -1,0 +1,113 @@
+-- Task 1: Create a Source Tables to hold customer data
+CREATE TABLE Customer_Source (
+    Customer_ID INT PRIMARY KEY,
+    Customer_Name VARCHAR(100),
+    City VARCHAR(100),
+    LastModifiedDate DATE
+);
+
+-- Insert initial data
+INSERT INTO Customer_Source VALUES (101, 'Anna Smith', 'London', '2025-01-08');
+INSERT INTO Customer_Source VALUES (102, 'Mikko Tiainen', 'Turku', '2025-01-08');
+INSERT INTO Customer_Source VALUES (103, 'Mark Wood', 'Madrid', '2025-01-08');
+
+-- Task 2: Create Customer Dimension with surrogate key to store historical vesions
+CREATE TABLE Customer_Dim (
+    Customer_Key INT IDENTITY(1,1) PRIMARY KEY,  -- surrogate key
+    Customer_ID INT,                             -- natural key
+    Customer_Name VARCHAR(100),
+    City VARCHAR(100),
+    Start_Date DATE,
+    End_Date DATE,
+    Is_Current BIT
+);
+
+-- Task 3: Create Fact Table for sales that references surrogate key in the dimensionm
+CREATE TABLE Sales_Fact (
+    Sales_ID INT IDENTITY(1,1) PRIMARY KEY,
+    Customer_Key INT,
+    Sale_Date DATE,
+    Amount DECIMAL(10,2),
+    FOREIGN KEY (Customer_Key) REFERENCES Customer_Dim(Customer_Key)
+);
+
+-- Task 4: Load Initial Customer Records into the dimension, mark them as current
+--Insert a few initial sales 3-5 is enough referencing correct surrogate keys.
+-- Load customers from source
+INSERT INTO Customer_Dim (Customer_ID, Customer_Name, City, Start_Date, End_Date, Is_Current)
+SELECT
+    Customer_ID,
+    Customer_Name,
+    City,
+    '2025-01-08' AS Start_Date,
+    NULL AS End_Date,
+    1 AS Is_Current
+FROM Customer_Source;
+
+-- Check dimension table
+SELECT * FROM Customer_Dim;
+
+-- Let's assume ssume keys are 1=Anna, 2=Mikko, 3=Mark
+INSERT INTO Sales_Fact (Customer_Key, Sale_Date, Amount) VALUES
+(1, '2025-02-01', 120.00),
+(2, '2025-02-01', 200.00),
+(3, '2025-02-01', 150.00),
+(1, '2025-03-01', 90.00);
+
+-- Check dimension table
+SELECT * FROM Customer_Dim;
+
+-- Task 5: Simulate Change Source
+UPDATE Customer_Source
+SET City = 'Tampere', LastModifiedDate = '2025-08-25'
+WHERE Customer_ID = 101;
+
+-- Task 6: Update the Dimension (ETL Simulation)
+-- 6.1:
+-- Find the record to update
+SELECT * FROM Customer_Dim WHERE Customer_ID = 101 AND Is_Current = 1;
+
+-- 6.2:
+-- Close the old version (Anna’s London record)
+UPDATE Customer_Dim
+SET End_Date = '2025-08-24', Is_Current = 0
+WHERE Customer_ID = 101 AND Is_Current = 1;
+
+-- 6.3:
+-- Insert new version (Anna in Tampere)
+INSERT INTO Customer_Dim (Customer_ID, Customer_Name, City, Start_Date, End_Date, Is_Current)
+VALUES (101, 'Anna Smith', 'Tampere', '2025-08-25', NULL, 1);
+
+-- Task 7: Insert a new sale
+-- 7.1:
+-- Find Anna’s new Customer_Key
+SELECT Customer_Key FROM Customer_Dim WHERE Customer_ID = 101 AND Is_Current = 1;
+
+-- Suppose it's 4
+INSERT INTO Sales_Fact (Customer_Key, Sale_Date, Amount)
+VALUES
+(4, '2025-09-01', 130.00),
+(4, '2025-09-15', 175.00);
+
+-- Task 8:
+-- Run a query and verify that shows sales by city over time. Verify that Anna’s older sales appear in Helsinki, -->
+-- while her newer sales appear in Tampere
+SELECT
+    d.Customer_Name,
+    d.City,
+    f.Sale_Date,
+    f.Amount
+FROM Sales_Fact f
+JOIN Customer_Dim d ON f.Customer_Key = d.Customer_Key
+ORDER BY d.Customer_Name, f.Sale_Date;
+
+-- Final query
+-- A final query showing sales split by customer city, proving historical correctness.
+SELECT
+    d.City,
+    YEAR(f.Sale_Date) AS Year,
+    SUM(f.Amount) AS Total_Sales
+FROM Sales_Fact f
+JOIN Customer_Dim d ON f.Customer_Key = d.Customer_Key
+GROUP BY d.City, YEAR(f.Sale_Date)
+ORDER BY Year, d.City;
